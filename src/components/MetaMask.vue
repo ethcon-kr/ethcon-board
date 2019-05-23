@@ -1,7 +1,7 @@
 <template>
   <div id="ethboard-metamask">
     <slot name="ethboard-metamask"></slot>
-    <p> This Section is Metamask button</p>
+    <p> 메시지를 등록해주세요 </p>
     <b-input placeholder="Enter text to Post"
           size="is-medium"
           v-model="sendPokeMessage"
@@ -35,16 +35,17 @@ export default {
         return;
       }
       // TODO : convert sendPokeMessage input convert to hex
-      const input_data = `0x1504460f${this.sendPokeMessage.substring(0)}`;
+      const input_text = web3.toHex(this.sendPokeMessage);
+      const tx_data = "0x1504460f" + input_text.substring(2);
 
       const transactionParameters = {
         nonce: '0x00', // ignored by MetaMask
-        gasPrice: '0x01', // customizable by user during MetaMask confirmation.
-        gasLimit: '0x2710',  // customizable by user during MetaMask confirmation.
+        gasPrice: '0x0', // customizable by user during MetaMask confirmation.
+        gasLimit: '0x186a0',  // customizable by user during MetaMask confirmation.
         to: '0x8d896cca54f657d873add4365a9c5319e5d28ebb', // Required except during contract publications.
         from: web3.eth.accounts[0], // must match user's active address.
         value: '0x00', // Only required to send ether to the recipient from the initiating external account.
-        data: input_data, // Optional, but used for defining smart contract creation and interaction.
+        data: tx_data, // Optional, but used for defining smart contract creation and interaction.
         chainId: 3 // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
       };
 
@@ -56,7 +57,7 @@ export default {
       }, function (err, response) {
           const rejected = 'User denied transaction signature.';
           if (response.error && response.error.message.includes(rejected)) {
-            return alert(`We can't take your money without your permission.`)
+            return // alert(`We can't take your money without your permission.`)
           }
 
           if (err) {
