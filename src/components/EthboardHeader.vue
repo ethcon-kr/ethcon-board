@@ -1,6 +1,7 @@
 <template>
   <div id="faucet-header">
-    <h1 id="main"><a href="https://github.com/Onther-Tech/faucet-dapp" target="_blank">Faraday Tokamak Faucet</a></h1>
+    <h1 id="main"><a href="https://github.com/ethcon-kr/ethcon-board
+" target="_blank">Ethcon Message Board</a></h1>
   </div>
 </template>
 

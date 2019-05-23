@@ -1,6 +1,7 @@
+// Todo change Message showing up not push button.
 <template>
-  <div id="faucet-body">
-    <slot name="faucet"></slot>
+  <div id="ethboard-body">
+    <slot name="ethboard-body"></slot>
   </div>
 </template>
 
@@ -8,14 +9,14 @@
 export default {
   data() {
     return {
-      account: null
+      postedMessages: null
     }
   }
 }
 </script>
 
 <style>
-#faucet-body {
+#ethboard-body {
   margin-left: 6em;
   margin-right: 6em;
   margin-bottom: 5em;
