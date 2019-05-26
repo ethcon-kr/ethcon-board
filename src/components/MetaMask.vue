@@ -1,7 +1,7 @@
 <template>
   <div id="ethboard-metamask">
     <slot name="ethboard-metamask"></slot>
-    <p> 메시지를 등록해주세요 </p>
+    <p class="input_intro"> 메시지를 등록해주세요. ( 최대 16글자 ) </p>
     <b-input placeholder="Enter text to Post"
           size="is-medium"
           v-model="sendPokeMessage"
@@ -14,6 +14,7 @@
 
 <script>
 export default {
+  props: ['sendPokeMessage'],
   created () {
     // const yourAddress = '0x0c54FcCd2e384b4BB6f2E405Bf5Cbc15a017AaFb';
     // const value = '0xde0b6b3a7640000'; // an ether has 18 decimals, here in hex.
@@ -121,4 +122,10 @@ export default {
 .send_tx{
   margin-top: 10px;
 }
+
+.input_intro{
+    margin-bottom: 0.5em;
+    fontSize: 18;
+}
+
 </style>

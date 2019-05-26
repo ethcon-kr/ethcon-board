@@ -1,17 +1,7 @@
 <template>
   <div id="app">
     <ethboard-header></ethboard-header>
-    <ethboard-body>
-      <div slot="ethboard-body">
-        <b-input placeholder="Enter your testnet account address"
-          size="is-medium"
-          v-model="accountToFaucetPeth"
-        ></b-input>
-        <b-button class="faucet-button"
-          v-on:click="showMessage"
-        > Request PETH </b-button>
-      </div>
-    </ethboard-body>
+    <ethboard-body v-bind:posted-messages="postedMessages"></ethboard-body>
     <!--<ethboard-post>-->
       <!--<div slot="ethboard-post">-->
         <!--<b-input placeholder="Enter text to Post"-->
@@ -23,14 +13,11 @@
         <!--&gt; Post Text </b-button>-->
       <!--</div>-->
     <!--</ethboard-post>-->
-    <board
-      v-bind:message="message"
-    ></board>
     <metamask></metamask>
-    <faucet-footer
+    <ethboard-footer>
       v-bind:transactionHash="transactionHash"
       v-bind:errorMessage="errorMessage"
-    ></faucet-footer>
+    </ethboard-footer>
   </div>
 </template>
 
@@ -44,47 +31,100 @@ import Web3         from 'web3'
 
 export default {
   name: 'app',
+  components: {
+    'ethboard-header': EthBoardHeader,
+    'ethboard-body'  : EthBoardBody,
+    'ethboard-footer': EthBoardFooter,
+    'metamask'       : MetaMask,
+  },
   data() {
     return {
       web3: null,
       operator: null,
-      accountToFaucetPeth: null,
-      message: '',
-      postTexts: null,
+      postedMessages: [
+          {
+              id: 1,
+              message: "기록된 데이터 가져오기",
+          },
+          {
+              id: 2,
+              message: "Second Message",
+
+          },
+          {
+              id: 3,
+              message: "Third Message",
+          }
+      ],
       transactionHash: '',
       sendPokeMessage: '',
       errorMessage: '',
     }
   },
-  components: {
-    'ethboard-header': EthBoardHeader,
-    'ethboard-body': EthBoardBody,
-    'faucet-footer': EthBoardFooter,
-      'metamask' : MetaMask,
-  },
   created () {
+      this.fetchBoard();
     // web3 version 0.20.3, https://github.com/ethereum/wiki/wiki/JavaScript-API
-    this.web3 = new Web3(new Web3.providers.WebsocketProvider('ws://54.180.107.35:8546'));
+    // window.console.log("started!");
+    // const web3rpc = new Web3(new Web3.providers.HttpProvider('http://54.180.107.35:8545'));
+    //
+    // var boardContract = web3rpc.eth.Contract(boardABI.abi, '0x8d896cca54f657d873add4365a9c5319e5d28ebb');
+    //
+    // // const latestPos =  boardContract.methods.().call().then((result)
+    //
+    // boardContract.methods.getPost().call()
+    // .then((result) => {
+    //     window.console.log(result);
+    //     this.postedMessages[0].message=web3.toAscii(result["1"]);
+    // });
 
-    var storageContract = web3.eth.contract(boardABI);
-    var storageContractInstance = storageContract.at('0xd91fb8750ea1decef4cee9d8314f4a60de039457'); // change to deployed contract address
-    var event = storageContractInstance.Created({}, []) // inside arguments 필터 역할을 한다.
+    // _, this.postedMessages[0].message = boardContract.getPost;
 
-    const self = this;
-    event.watch((error, result) => {
-      if (!error) console.log(result.args.value);
-      self.message = result;
-    });
+    // window.console.log(this.postedMessages[0].message);
+    //
+    // this.web3ws = new Web3(new Web3.providers.WebsocketProvider('ws://54.180.107.35:8546'));
+    //
+    // var storageContract = web3.eth.contract(boardABI);
+    // var storageContractInstance = storageContract.at('0x8d896cca54f657d873add4365a9c5319e5d28ebb'); // change to deployed contract address
+    //
+    // var event = storageContractInstance.Updated({}, []); // inside arguments 필터 역할을 한다.
+    //
+    // // TODO: Update messages from ethboard contract
+    // // this.postedMessages[0].message = 'Updated Message';
+    //
+    // const self = this;
+    // event.watch((error, result) => {
+    //   if (!error) console.log(result.args.value);
+    //   self.postedMessages = result;
+    // });
+  },
+  //   beforeDestroy () {
+  //     event.stopWatching();
+  // },
+  mounted() {
+
   },
   methods: {
+    fetchBoard() {
+      const web3rpc = new Web3(new Web3.providers.HttpProvider('http://54.180.107.35:8545'));
+
+      var boardContract = web3rpc.eth.Contract(boardABI.abi, '0x8d896cca54f657d873add4365a9c5319e5d28ebb');
+
+    // const latestPos =  boardContract.methods.().call().then((result)
+
+      boardContract.methods.getPost().call()
+      .then((result) => {
+        window.console.log(result);
+        this.postedMessages[0].message=result["1"];
+      });
+    },
     showMessage: async function () {
-      if (!this.web3.utils.isAddress(this.accountToFaucetPeth)) {
+      if (!this.web3ws.utils.isAddress(this.accountToFaucetPeth)) {
         this.errorMessage = 'invalid address';
         this.transactionHash = '';
         this.accountToFaucetPeth = '';
         return;
       }
-      this.web3.eth.sendTransaction({from: this.operator, to: this.accountToFaucetPeth, value: 1000000000000000000, gasPrice: 1}, (err, hash) => {
+      this.web3rpc.eth.sendTransaction({from: this.operator, to: this.accountToFaucetPeth, value: 1000000000000000000, gasPrice: 1}, (err, hash) => {
         if (err) {
           this.errorMessage = err;
           this.transactionHash = '';
@@ -96,24 +136,24 @@ export default {
         this.accountToFaucetPeth = '';
       })
     },
-    postText: async function () {
-      if (this.postTexts.length > 16) {
-        this.errorMessage = 'Too long text';
-        this.transactionHash = '';
-        return;
-      }
-      const data = `0x1504460f${this.postTexts.substring(2)}`
-      this.web3.eth.sendTransaction({from: this.operator, to: '0x8d896cca54f657d873add4365a9c5319e5d28ebb', data: data, gasPrice: 1}, (err, hash) => {
-        if (err) {
-          this.errorMessage = err;
-          this.transactionHash = '';
-          return;
-        }
-        this.errorMessage = '';
-        this.transactionHash= hash;
-      })
-    },
-  }
+    // postText: async function () {
+    //   if (this.postTexts.length > 16) {
+    //     this.errorMessage = 'Too long text';
+    //     this.transactionHash = '';
+    //     return;
+    //   }
+    //   const data = `0x1504460f${this.postTexts.substring(2)}`
+    //   this.web3.eth.sendTransaction({from: this.operator, to: '0x8d896cca54f657d873add4365a9c5319e5d28ebb', data: data, gasPrice: 1}, (err, hash) => {
+    //     if (err) {
+    //       this.errorMessage = err;
+    //       this.transactionHash = '';
+    //       return;
+    //     }
+    //     this.errorMessage = '';
+    //     this.transactionHash= hash;
+    //   })
+    // },
+    }
 }
 </script>
 
@@ -124,11 +164,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
-.faucet-button {
-  margin-top: 10px;
-}
 
-.post-button{
-  margin-top: 10px;
-}
 </style>

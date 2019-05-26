@@ -188,7 +188,9 @@ contract DSMessage is DSThing {
     }
 
     // message array from users
-    Message[] Messages;
+    Message[] public Messages;
+
+    event Updated(uint pos);  // send only updated message position
 
     // top of authorized index position
     uint256 private indexTobePost;
@@ -204,6 +206,8 @@ contract DSMessage is DSThing {
                 // if does not, next line should be.
                 // setPostManually(Pos-1);
                 indexTobePost = Pos;
+
+                emit Updated(Pos);
                 break;
             }
         }

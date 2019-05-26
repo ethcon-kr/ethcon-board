@@ -1,5 +1,5 @@
 <template>
-  <div id="faucet-footer">
+  <div id="ethboard-footer">
     <b-message type="is-success"
       v-if="this.transactionHash !== ''"
     >
@@ -20,7 +20,7 @@ export default {
 </script>
 
 <style>
-#faucet-footer {
+#ethboard-footer {
   margin-left: 6em;
   margin-right: 6em;
 }
